@@ -1,0 +1,14 @@
+# Środowisko wirtualne Pythona i pliki tymczasowe
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# IDE
+.vscode/
+.idea/
+.opencode/
+
+# Helm
+*.tgz
+charts/
