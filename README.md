@@ -48,7 +48,7 @@ minikube docker-env | Invoke-Expression
 
 # Budowa obrazu
 cd stress_test_app
-docker build -t test:latest .
+docker build -t test:1.0.0 .
 ```
 Wdrażamy aplikację na klaster za pomocą naszego Helm Charta:
 ```powershell
