@@ -16,11 +16,15 @@ def stress_cpu():
 
 @app.route('/stress-ram')
 def stress_ram():
-    timeout = time.time() + 15
     a = []
-    for _ in range(50):
-        a.append('a' * 10**6)
-    time.sleep(15)
+    for _ in range(15):
+        a.append('a' * (5 * 10**6))
+        time.sleep(2)
+
+    #czekam chwile zeby prometheus zdazyl zebrac dane
+    time.sleep(30)
+    a.append('a' * (100 * 10**6))
+    
     return "Koniec obciazenia ram"
 
 if __name__ == "__main__":
