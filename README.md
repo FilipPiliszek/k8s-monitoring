@@ -50,7 +50,7 @@ Wdrażamy aplikację na klaster za pomocą naszego Helm Charta:
 cd ../helm_charts/stress-test
 helm install test-app .
 ```
-> Po każdej zmianie kodu w `app.py`: przebuduj obraz (`minikube image build -t test:1.0.1 ./stress_test_app`) i wymuś nowy pod komendą `kubectl rollout restart deployment test-app-stress-test` (tag się nie zmienia, więc sam Helm poda nie odświeży).
+> Po każdej zmianie kodu w `app.py`: przebuduj obraz (`minikube image build -t test:1.0.1 ./stress_test_app`) i wymuś nowy pod komendą `kubectl rollout restart statefulset test-app-stress-test` (tag się nie zmienia, więc sam Helm poda nie odświeży).
 ### 3. Uruchomienie tuneli i testy
 Aby dostać się do interfejsów z poziomu przeglądarki (localhost), uruchom dwa tunele w osobnych oknach terminala:
 ```powershell

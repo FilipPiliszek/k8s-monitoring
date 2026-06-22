@@ -16,7 +16,7 @@
   "time": { "from": "now-30m", "to": "now" },
   "title": "Stress Test - Zasoby (CPU/RAM) z limitami",
   "uid": "stress-test-resources",
-  "version": 1,
+  "version": 2,
   "panels": [
     {
       "id": 1,
@@ -44,7 +44,7 @@
         {
           "refId": "A",
           "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-          "expr": "sum(rate(container_cpu_usage_seconds_total{pod=~\"test-app-stress-test.*\"}[1m]))",
+          "expr": "sum(rate(container_cpu_usage_seconds_total{pod=~\"test-app-stress-test.*\"}[30s]))",
           "legendFormat": "Zużycie CPU (rdzenie)"
         },
         {
@@ -101,6 +101,8 @@
       "fieldConfig": {
         "defaults": {
           "unit": "short",
+          "decimals": 0,
+          "min": 0,
           "custom": { "drawStyle": "line", "lineInterpolation": "stepAfter", "lineWidth": 2, "fillOpacity": 15, "pointSize": 6, "showPoints": "always" },
           "color": { "mode": "fixed", "fixedColor": "red" }
         },
