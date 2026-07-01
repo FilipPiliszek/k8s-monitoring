@@ -2,19 +2,21 @@
   "apiVersion": "dashboard.grafana.app/v2",
   "kind": "Dashboard",
   "metadata": {
-    "name": "adt5j4l",
+    "name": "stress-test-resources",
     "namespace": "default",
-    "uid": "13c78ad0-05b5-4e5d-b51c-3517fc773b2a",
-    "resourceVersion": "1781707185494980",
-    "generation": 1,
-    "creationTimestamp": "2026-06-17T14:39:45Z",
+    "uid": "7b671b92-16d2-4708-a928-7d9ac17ae3d4",
+    "resourceVersion": "1782399603046010",
+    "generation": 23,
+    "creationTimestamp": "2026-06-25T11:56:55Z",
     "labels": {
-      "grafana.app/deprecatedInternalID": "103656694517760"
+      "grafana.app/deprecatedInternalID": "2961781578317824"
     },
     "annotations": {
-      "grafana.app/createdBy": "user:afpeyvs7btt6oc",
+      "grafana.app/createdBy": "user:bfq499ivqw9vkc",
       "grafana.app/folder": "",
-      "grafana.app/saved-from-ui": "Grafana v13.0.2 (3fcdbc5a)"
+      "grafana.app/saved-from-ui": "Grafana v13.1.0 (b309c9bb3b)",
+      "grafana.app/updatedBy": "user:bfq499ivqw9vkc",
+      "grafana.app/updatedTimestamp": "2026-06-25T15:00:03Z"
     }
   },
   "spec": {
@@ -40,14 +42,13 @@
       }
     ],
     "cursorSync": "Off",
-    "description": "",
     "editable": true,
     "elements": {
       "panel-1": {
         "kind": "Panel",
         "spec": {
           "id": 1,
-          "title": "RAM Usage",
+          "title": "CPU – zużycie vs limit (0.2 rdzenia)",
           "description": "",
           "links": [],
           "data": {
@@ -66,9 +67,8 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sum(container_memory_working_set_bytes{pod=~\"test-app.*\"}) by (pod)",
-                        "interval": "5s",
-                        "legendFormat": "__auto",
+                        "expr": "sum(rate(container_cpu_usage_seconds_total{pod=~\"test-app-stress-test.*\"}[30s]))",
+                        "legendFormat": "Zużycie CPU (rdzenie)",
                         "range": true
                       }
                     },
@@ -88,10 +88,8 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "max by (pod) (kube_pod_container_resource_limits{pod=~\"test-app.*\", resource=\"memory\"})",
-                        "instant": false,
-                        "interval": "5s",
-                        "legendFormat": "__auto",
+                        "expr": "max(kube_pod_container_resource_limits{resource=\"cpu\",container=\"stress-test\",pod=~\"test-app-stress-test.*\"})",
+                        "legendFormat": "Limit CPU (0.2 rdzenia)",
                         "range": true
                       }
                     },
@@ -101,15 +99,13 @@
                 }
               ],
               "transformations": [],
-              "queryOptions": {
-                "interval": "10s"
-              }
+              "queryOptions": {}
             }
           },
           "vizConfig": {
             "kind": "VizConfig",
             "group": "timeseries",
-            "version": "13.0.2",
+            "version": "13.1.0",
             "spec": {
               "options": {
                 "annotations": {
@@ -119,6 +115,8 @@
                 "legend": {
                   "calcs": [],
                   "displayMode": "list",
+                  "enableFacetedFilter": false,
+                  "overflow": "ellipsis",
                   "placement": "bottom",
                   "showLegend": true
                 },
@@ -130,7 +128,7 @@
               },
               "fieldConfig": {
                 "defaults": {
-                  "unit": "bytes",
+                  "unit": "short",
                   "thresholds": {
                     "mode": "absolute",
                     "steps": [
@@ -156,7 +154,7 @@
                     "barAlignment": 0,
                     "barWidthFactor": 0.6,
                     "drawStyle": "line",
-                    "fillOpacity": 0,
+                    "fillOpacity": 10,
                     "gradientMode": "none",
                     "hideFrom": {
                       "legend": false,
@@ -182,7 +180,37 @@
                     }
                   }
                 },
-                "overrides": []
+                "overrides": [
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Limit CPU (0.2 rdzenia)"
+                    },
+                    "properties": [
+                      {
+                        "id": "color",
+                        "value": {
+                          "fixedColor": "yellow",
+                          "mode": "fixed"
+                        }
+                      },
+                      {
+                        "id": "custom.lineStyle",
+                        "value": {
+                          "dash": [
+                            10,
+                            10
+                          ],
+                          "fill": "dash"
+                        }
+                      },
+                      {
+                        "id": "custom.fillOpacity",
+                        "value": 0
+                      }
+                    ]
+                  }
+                ]
               }
             }
           }
@@ -192,7 +220,7 @@
         "kind": "Panel",
         "spec": {
           "id": 2,
-          "title": "CPU Usage",
+          "title": "RAM – zużycie vs limit (~134 MB)",
           "description": "",
           "links": [],
           "data": {
@@ -211,9 +239,8 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sum(rate(container_cpu_usage_seconds_total{pod=~\"test-app.*\"}[1m])) by (pod)",
-                        "interval": "5",
-                        "legendFormat": "__auto",
+                        "expr": "sum(container_memory_working_set_bytes{pod=~\"test-app-stress-test.*\"})",
+                        "legendFormat": "Zużycie RAM",
                         "range": true
                       }
                     },
@@ -233,10 +260,8 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "max by (pod) (kube_pod_container_resource_limits{pod=~\"test-app.*\", resource=\"cpu\"})",
-                        "instant": false,
-                        "interval": "5",
-                        "legendFormat": "__auto",
+                        "expr": "max(kube_pod_container_resource_limits{resource=\"memory\",container=\"stress-test\",pod=~\"test-app-stress-test.*\"})",
+                        "legendFormat": "Limit RAM (~134 MB)",
                         "range": true
                       }
                     },
@@ -246,15 +271,13 @@
                 }
               ],
               "transformations": [],
-              "queryOptions": {
-                "interval": "10s"
-              }
+              "queryOptions": {}
             }
           },
           "vizConfig": {
             "kind": "VizConfig",
             "group": "timeseries",
-            "version": "13.0.2",
+            "version": "13.1.0",
             "spec": {
               "options": {
                 "annotations": {
@@ -264,6 +287,8 @@
                 "legend": {
                   "calcs": [],
                   "displayMode": "list",
+                  "enableFacetedFilter": false,
+                  "overflow": "ellipsis",
                   "placement": "bottom",
                   "showLegend": true
                 },
@@ -275,6 +300,400 @@
               },
               "fieldConfig": {
                 "defaults": {
+                  "unit": "decbytes",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "green"
+                      },
+                      {
+                        "value": 80,
+                        "color": "red"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "axisBorderShow": false,
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "barAlignment": 0,
+                    "barWidthFactor": 0.6,
+                    "drawStyle": "line",
+                    "fillOpacity": 10,
+                    "gradientMode": "none",
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    },
+                    "insertNulls": false,
+                    "lineInterpolation": "linear",
+                    "lineWidth": 1,
+                    "pointSize": 5,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "showPoints": "auto",
+                    "showValues": false,
+                    "spanNulls": false,
+                    "stacking": {
+                      "group": "A",
+                      "mode": "none"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "off"
+                    }
+                  }
+                },
+                "overrides": [
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Limit RAM (~134 MB)"
+                    },
+                    "properties": [
+                      {
+                        "id": "color",
+                        "value": {
+                          "fixedColor": "yellow",
+                          "mode": "fixed"
+                        }
+                      },
+                      {
+                        "id": "custom.lineStyle",
+                        "value": {
+                          "dash": [
+                            10,
+                            10
+                          ],
+                          "fill": "dash"
+                        }
+                      },
+                      {
+                        "id": "custom.fillOpacity",
+                        "value": 0
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "panel-3": {
+        "kind": "Panel",
+        "spec": {
+          "id": 3,
+          "title": "Restarty poda (skok = OOMKilled / crash)",
+          "description": "",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "max(kube_pod_container_status_restarts_total{pod=~\"test-app-stress-test.*\"})",
+                        "legendFormat": "Restarty",
+                        "range": true
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "timeseries",
+            "version": "13.1.0",
+            "spec": {
+              "options": {
+                "annotations": {
+                  "clustering": -1,
+                  "multiLane": false
+                },
+                "legend": {
+                  "calcs": [],
+                  "displayMode": "list",
+                  "enableFacetedFilter": false,
+                  "overflow": "ellipsis",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "hideZeros": false,
+                  "mode": "single",
+                  "sort": "none"
+                }
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "short",
+                  "decimals": 0,
+                  "min": 0,
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "green"
+                      },
+                      {
+                        "value": 80,
+                        "color": "red"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "fixed",
+                    "fixedColor": "red"
+                  },
+                  "custom": {
+                    "axisBorderShow": false,
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "barAlignment": 0,
+                    "barWidthFactor": 0.6,
+                    "drawStyle": "line",
+                    "fillOpacity": 15,
+                    "gradientMode": "none",
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    },
+                    "insertNulls": false,
+                    "lineInterpolation": "stepAfter",
+                    "lineWidth": 2,
+                    "pointSize": 6,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "showPoints": "always",
+                    "showValues": false,
+                    "spanNulls": false,
+                    "stacking": {
+                      "group": "A",
+                      "mode": "none"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "off"
+                    }
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "panel-6": {
+        "kind": "Panel",
+        "spec": {
+          "id": 6,
+          "title": "CPU Throttling % (Ostatnie 5 minut)",
+          "description": "",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "sum(increase(container_cpu_cfs_throttled_periods_total{pod=\"test-app-stress-test-0\"}[5m]))\r\n/\r\nsum(increase(container_cpu_cfs_periods_total{pod=\"test-app-stress-test-0\"}[5m])) * 100",
+                        "legendFormat": "__auto",
+                        "range": true
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "gauge",
+            "version": "13.1.0",
+            "spec": {
+              "options": {
+                "barShape": "flat",
+                "barWidthFactor": 0.3,
+                "effects": {
+                  "barGlow": false,
+                  "centerGlow": false,
+                  "gradient": true
+                },
+                "endpointMarker": "point",
+                "minVizHeight": 75,
+                "minVizWidth": 75,
+                "orientation": "auto",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "segmentCount": 1,
+                "segmentSpacing": 0.3,
+                "shape": "gauge",
+                "showThresholdLabels": false,
+                "showThresholdMarkers": false,
+                "sizing": "auto",
+                "sparkline": true,
+                "textMode": "auto"
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "percent",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "green"
+                      },
+                      {
+                        "value": 80,
+                        "color": "red"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "thresholds"
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "panel-7": {
+        "kind": "Panel",
+        "spec": {
+          "id": 7,
+          "title": "Operacje dyskowe (I/O)",
+          "description": "",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "sum(rate(container_fs_reads_bytes_total{pod=\"test-app-stress-test-0\"}[5m]))",
+                        "legendFormat": "Odczyt",
+                        "range": true
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "sum(rate(container_fs_writes_bytes_total{pod=\"test-app-stress-test-0\"}[5m]))",
+                        "instant": false,
+                        "legendFormat": "Zapis",
+                        "range": true
+                      }
+                    },
+                    "refId": "B",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "timeseries",
+            "version": "13.1.0",
+            "spec": {
+              "options": {
+                "annotations": {
+                  "clustering": -1,
+                  "multiLane": false
+                },
+                "legend": {
+                  "calcs": [],
+                  "displayMode": "list",
+                  "enableFacetedFilter": false,
+                  "overflow": "ellipsis",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "hideZeros": false,
+                  "mode": "single",
+                  "sort": "none"
+                }
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "binBps",
                   "thresholds": {
                     "mode": "absolute",
                     "steps": [
@@ -334,32 +753,85 @@
       }
     },
     "layout": {
-      "kind": "GridLayout",
+      "kind": "RowsLayout",
       "spec": {
-        "items": [
+        "rows": [
           {
-            "kind": "GridLayoutItem",
+            "kind": "RowsLayoutRow",
             "spec": {
-              "x": 0,
-              "y": 0,
-              "width": 12,
-              "height": 8,
-              "element": {
-                "kind": "ElementReference",
-                "name": "panel-1"
+              "title": "Wykres zużycia zasobów",
+              "collapse": false,
+              "layout": {
+                "kind": "AutoGridLayout",
+                "spec": {
+                  "maxColumnCount": 3,
+                  "columnWidthMode": "standard",
+                  "rowHeightMode": "standard",
+                  "items": [
+                    {
+                      "kind": "AutoGridLayoutItem",
+                      "spec": {
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-1"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "AutoGridLayoutItem",
+                      "spec": {
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-2"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "AutoGridLayoutItem",
+                      "spec": {
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-7"
+                        }
+                      }
+                    }
+                  ]
+                }
               }
             }
           },
           {
-            "kind": "GridLayoutItem",
+            "kind": "RowsLayoutRow",
             "spec": {
-              "x": 12,
-              "y": 0,
-              "width": 12,
-              "height": 8,
-              "element": {
-                "kind": "ElementReference",
-                "name": "panel-2"
+              "title": "Restarty Poda / CPU Throttling Time %",
+              "collapse": false,
+              "layout": {
+                "kind": "AutoGridLayout",
+                "spec": {
+                  "maxColumnCount": 3,
+                  "columnWidthMode": "standard",
+                  "rowHeightMode": "standard",
+                  "items": [
+                    {
+                      "kind": "AutoGridLayoutItem",
+                      "spec": {
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-3"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "AutoGridLayoutItem",
+                      "spec": {
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-6"
+                        }
+                      }
+                    }
+                  ]
+                }
               }
             }
           }
@@ -369,12 +841,14 @@
     "links": [],
     "liveNow": false,
     "preload": false,
-    "tags": [],
+    "tags": [
+      "stress-test"
+    ],
     "timeSettings": {
       "timezone": "browser",
-      "from": "now-5m",
+      "from": "now-30m",
       "to": "now",
-      "autoRefresh": "5s",
+      "autoRefresh": "30s",
       "autoRefreshIntervals": [
         "5s",
         "10s",
@@ -390,15 +864,7 @@
       "hideTimepicker": false,
       "fiscalYearStartMonth": 0
     },
-    "title": "Default",
-    "variables": [],
-    "preferences": {
-      "layout": {
-        "kind": "GridLayout",
-        "spec": {
-          "items": []
-        }
-      }
-    }
+    "title": "Stress Test - Zasoby (CPU/RAM) z limitami",
+    "variables": []
   }
 }

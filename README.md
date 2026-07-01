@@ -60,22 +60,24 @@ kubectl port-forward svc/my-prometheus-grafana -n monitoring 3000:80
 # Otwarcie aplikacji testowej (dostęp pod: http://localhost:8080)
 kubectl port-forward svc/test-app-stress-test 8080:8080
 ```
-Aplikacja udostępnia trzy testy: RAM w trybie Step (schodkowy) i Peak (nagły skok) oraz CPU w trybie Peak:
+Aplikacja udostępnia cztery testy: RAM w trybie Step (schodkowy) i Peak (nagły skok) oraz CPU w trybie Peak, oraz test dysku:
 
-| Endpoint | Tryb | Opis |
-|---|---|---|
-| `http://localhost:8080/cpu/peak` | Peak Test | Natychmiastowe pełne obciążenie CPU |
-| `http://localhost:8080/ram/step` | Step Test | Stopniowa alokacja małych porcji RAM |
-| `http://localhost:8080/ram/peak` | Peak Test | Jednorazowa alokacja dużego bloku RAM |
+| Endpoint                          | Tryb | Opis                                           |
+|-----------------------------------|---|------------------------------------------------|
+| `http://localhost:8080/cpu/peak`  | Peak Test | Natychmiastowe pełne obciążenie CPU            |
+| `http://localhost:8080/ram/step`  | Step Test | Stopniowa alokacja małych porcji RAM           |
+| `http://localhost:8080/ram/peak`  | Peak Test | Jednorazowa alokacja dużego bloku RAM          |
+| `http://localhost:8080/disk/peak` | Peak Test | Zapis a po 30s przerwie czasowej odczyt danych |
 
 Parametry (przekazywane w URL jako query string, wszystkie opcjonalne):
 
-| Endpoint | Parametr | Domyślnie | Znaczenie |
-|---|---|---|---|
-| `/cpu/peak` | `seconds` | `15` | Jak długo (s) trzymać pełne obciążenie CPU |
-| `/ram/step` | `chunks` | `15` | Liczba porcji pamięci do zaalokowania (co 2 s) |
-| `/ram/step` | `mb` | `5` | Rozmiar pojedynczej porcji w MB |
-| `/ram/peak` | `mb` | `80` | Rozmiar jednorazowo alokowanego bloku w MB |
+| Endpoint     | Parametr | Domyślnie | Znaczenie                                                     |
+|--------------|---|-----------|---------------------------------------------------------------|
+| `/cpu/peak`  | `seconds` | `15`      | Jak długo (s) trzymać pełne obciążenie CPU                    |
+| `/ram/step`  | `chunks` | `15`      | Liczba porcji pamięci do zaalokowania (co 2 s)                |
+| `/ram/step`  | `mb` | `5`       | Rozmiar pojedynczej porcji w MB                               |
+| `/ram/peak`  | `mb` | `80`      | Rozmiar jednorazowo alokowanego bloku w MB                    |
+| `/disk/peak` | `mb` | `100`     | Rozmiar danych zapisywanych a następnie odczytywanych z pliku |
 
 Przykłady wywołań:
 ```text
@@ -90,6 +92,9 @@ http://localhost:8080/ram/peak?mb=100
 
 # RAM – celowe przekroczenie limitu -> OOMKilled (demo incydentu)
 http://localhost:8080/ram/peak?mb=150
+
+# DISK - zapisywanie i odczytywanie danych
+http://localhost:8080/disk/peak?mb=50
 ```
 > Uwaga RAM: limit kontenera to 128Mi (~134 MB), a sama aplikacja zajmuje ~22 MB. Wartości `mb` powyżej ~110 dla `/ram/peak` przekroczą limit i pod zostanie ubity (`OOMKilled`).
 

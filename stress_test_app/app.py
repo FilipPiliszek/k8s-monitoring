@@ -1,6 +1,6 @@
 from flask import Flask, request
 import time
-
+import os
 app = Flask(__name__)
 
 
@@ -13,6 +13,8 @@ def home():
         "RAM:\n"
         "  /ram/step   - schodkowy wzrost (Step Test)   ?chunks=15&mb=5\n"
         "  /ram/peak   - nagly skok      (Peak Test)    ?mb=80\n"
+        "DISK:\n"
+        "  /disk/peak  - nagly skok      (Peak Test)    ?mb=100\n"
     )
 
 
@@ -52,6 +54,37 @@ def ram_peak():
     time.sleep(60) # zeby prometeusz zdazyl to zescrapowac
     return f"RAM PEAK done (~{mb} MB)"
 
+
+@app.route('/disk/peak')
+def disk_peak():
+    #100MB by default change by /disk/peak?mb=value
+    size_mb = int(request.args.get('mb', 100))
+    file_path = "stress_test_temp_file.bin"
+    one_mb_data = os.urandom(1024 * 1024)
+
+    #write part
+    with open(file_path, "wb") as f:
+        for _ in range(size_mb):
+            f.write(one_mb_data)
+        #drop ram data to physical disk
+        os.fsync(f.fileno())
+        #INSTANT delete this file from ram memory
+        os.posix_fadvise(f.fileno(), 0, 0, os.POSIX_FADV_DONTNEED)
+
+    #to better show disk graph
+    time.sleep(31)
+
+    #read part
+    with open(file_path, "rb") as f:
+        #read file part by part
+        while f.read(1024 * 1024):
+            pass
+
+    #cleanup
+    if os.path.exists(file_path):
+        os.remove(file_path)
+
+    return f"Disk peak test done: Wrote & Read {size_mb} MB"
 
 if __name__ == "__main__":
     # threaded=True: serwer obsluguje sonde /  rownolegle ze stress-testem,
