@@ -13,6 +13,8 @@ def home():
         "RAM:\n"
         "  /ram/step   - schodkowy wzrost (Step Test)   ?chunks=15&mb=5\n"
         "  /ram/peak   - nagly skok      (Peak Test)    ?mb=80\n"
+        "DISK:\n"
+        "  /disk/peak  - nagly skok      (Peak Test)    ?mb=100\n"
     )
 
 
